@@ -23,7 +23,11 @@ void setup() {
 
 void loop() {
   wdt_reset();
-  
+
+  pumpTimer();
+}
+
+void pumpTimer() {
   if (pumpState == PUMP_ON && millis() - startTime >= pumpDuration) {
     digitalWrite(WATERPIN, HIGH);  // Turn off the water pump
     pumpState = PUMP_OFF;
@@ -35,7 +39,7 @@ void receiveEvent(int numBytes) {
   while (Wire.available()) {
     char signal = Wire.read();
     Serial.println(signal);
-    
+
     if (signal == '1' && pumpState == PUMP_OFF) {
       // Turn on the water pump
       digitalWrite(WATERPIN, LOW);

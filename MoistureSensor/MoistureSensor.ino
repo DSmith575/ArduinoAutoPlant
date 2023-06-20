@@ -12,7 +12,7 @@
 #define MAPMAX 100
 #define POTENTMIN 50
 #define POTENTMAX 100
-#define TIMEOUT 60000; 
+#define TIMEOUT 60000;
 
 #define ACTIVE '1'
 #define INACTIVE '0'
@@ -32,7 +32,7 @@ enum State {
 
 State currentState = IDLE;  // Initial state
 
-unsigned long previousMillis = 0;     // Variable to store the previous time
+unsigned long previousMillis = 0;    // Variable to store the previous time
 const unsigned long interval = 700;  // Interval between updates (in milliseconds)
 
 int moistureLevel;
@@ -51,34 +51,39 @@ void setup() {
 
 void loop() {
   wdt_reset();
+  stateMachine();
+}
+
+void stateMachine() {
   unsigned long currentMillis = millis();  // Current time
 
   // Check if the interval has elapsed
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;  // Update the previous time
-
     switch (currentState) {
 
- case IDLE:
-  if (!pumpActive) {
-    Serial.println("IDLE");
-    currentState = MEASURING_MOISTURE;
-  } else {
-    // Additional condition to handle the case when pumpActive is true for too long
-    unsigned long pumpActiveTimeout = TIMEOUT; // Timeout duration in milliseconds (e.g., 60 seconds)
-    Serial.println("TIME");
-    if (currentMillis - previousMillis >= pumpActiveTimeout) {
-      Serial.println("OUT");
-      pumpActive = false; // Set pumpActive to false if timeout occurs
-    }
-  }
-  break;
+      case IDLE:
+        if (!pumpActive) {
+          Serial.println("IDLE");
 
+          currentState = MEASURING_MOISTURE;
+
+        } else {
+          // Additional condition to handle the case when pumpActive is true for too long
+          unsigned long pumpActiveTimeout = TIMEOUT;  // Timeout duration in milliseconds (60 seconds)
+          Serial.println("TIME");
+          if (currentMillis - previousMillis >= pumpActiveTimeout) {
+            Serial.println("OUT");
+            pumpActive = false;  // Set pumpActive to false if timeout occurs
+          }
+        }
+        break;
 
       case MEASURING_MOISTURE:
         moistureLevel = readSensor(MSENSPOW, MSENSOR);
         moistureLevel = mapPercent(moistureLevel, SENSMIN, SENSMAX, MAPMAX, MAPMIN);
-Serial.println("MOISTURE");
+        Serial.println("MOISTURE");
+
         currentState = MEASURING_POTENT;
         break;
 
@@ -105,6 +110,7 @@ Serial.println("MOISTURE");
     }
   }
 }
+
 
 // This function returns the analog soil moisture measurement
 // This is used due to using a digitalPin instead of the 3.3v for a power source (which is under 20mA)
@@ -157,14 +163,3 @@ void sendRequest(int address, byte value) {
   Wire.endTransmission();
   Serial.println("SENT");
 }
-
-  // Check for acknowledgment from the receiver
-  // Wire.requestFrom(address, 1);
-  // if (Wire.available()) {
-  //   char ack = Wire.read();
-  //   if (ack == '1') {
-  //     pumpActive = true;  // Pump is active
-  //   } else if (ack == '0') {
-  //     pumpActive = false;  // Pump is inactive
-  //   }
-  // }}
