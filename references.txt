@@ -1,0 +1,4 @@
+https://learn.sparkfun.com/tutorials/sparkfun-inventors-kit-experiment-guide---v41/introduction
+
+https://forum.arduino.cc/t/controlling-water-pump-and-led-strip/483409/2
+Mainly for the picture for pump to relay connection
